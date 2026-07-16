@@ -1,2 +1,2 @@
 run: audited-full-tree-replacement
-synchronize: cancel-stale-and-run-final
+synchronize: publish-or-receipt-v2
