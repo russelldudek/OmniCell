@@ -1,0 +1,28 @@
+name: PR event diagnostic
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: write
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - name: Write diagnostic marker
+        shell: bash
+        run: |
+          set -euo pipefail
+          printf 'GitHub PR workflow executed.\n' > ACTION_RAN
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add ACTION_RAN
+          git commit -m "Record PR workflow diagnostic"
+          git push origin HEAD:main
