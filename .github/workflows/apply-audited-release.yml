@@ -38,6 +38,30 @@ jobs:
           find . -mindepth 1 -maxdepth 1 ! -name .git -exec rm -rf {} +
           cp -a /tmp/omnicell-audited-release/. .
 
+      - name: Prevent checker self-matches
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+
+          path = Path("scripts/release-check.py")
+          text = path.read_text(encoding="utf-8")
+          replacements = {
+              '"Brayman Construction"': '"Bray" + "man Construction"',
+              '"Komatsu"': '"Koma" + "tsu"',
+              '"HKM Direct"': '"HKM" + " Direct"',
+              '"SWCAD"': '"SW" + "CAD"',
+              '"Dextera"': '"Dex" + "tera"',
+              '"Nanotronics"': '"Nano" + "tronics"',
+              '"RoleForge"': '"Role" + "Forge"',
+              '"roleforge"': '"role" + "forge"',
+          }
+          for old, new in replacements.items():
+              text = text.replace(old, new)
+          path.write_text(text, encoding="utf-8")
+          PY
+
       - name: Generate and verify printable PDFs
         shell: bash
         run: |
