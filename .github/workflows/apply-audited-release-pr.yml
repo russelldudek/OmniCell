@@ -12,7 +12,7 @@ permissions:
   pull-requests: read
 
 concurrency:
-  group: audited-campaign-release-pr
+  group: audited-campaign-release-pr-v2
   cancel-in-progress: true
 
 jobs:
@@ -95,4 +95,19 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -A
           git commit -m "Replace failed release with audited candidate campaign"
+          git fetch origin main
+          git push --force-with-lease=refs/heads/main:$(git rev-parse origin/main) origin HEAD:main
+
+      - name: Record a repository-side failure receipt
+        if: failure()
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin main
+          git reset --hard origin/main
+          printf 'Audited replacement workflow failed. Run ID: %s\nRun attempt: %s\n' "$GITHUB_RUN_ID" "$GITHUB_RUN_ATTEMPT" > FINAL_RELEASE_FAILURE.txt
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add FINAL_RELEASE_FAILURE.txt
+          git commit -m "Record audited replacement workflow failure"
           git push origin HEAD:main
