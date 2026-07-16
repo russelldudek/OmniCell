@@ -1,0 +1,1 @@
+Temporary staging. The next operation creates a replacement Git tree.
