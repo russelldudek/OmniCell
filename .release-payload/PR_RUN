@@ -1,2 +1,2 @@
 run: audited-full-tree-replacement
-synchronize: preserve-workflows-final
+synchronize: git-data-api-release
