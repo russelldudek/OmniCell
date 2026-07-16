@@ -1,0 +1,30 @@
+Release payload diagnostic
+Expected SHA: b8388cbf73de7682c43735c03b847c4590be7b3bdd75d21da7d5c1fcda69be84
+Chunk files:
+part-00 10000 bytes
+part-01 10000 bytes
+part-02 10000 bytes
+part-03 10000 bytes
+part-04 10000 bytes
+part-05-00 2000 bytes
+part-05-01 2000 bytes
+part-05-02 2000 bytes
+part-05-03 2000 bytes
+part-05-04 2000 bytes
+part-06-00 2000 bytes
+part-06-01 2000 bytes
+part-06-02 2000 bytes
+part-06-03 2000 bytes
+part-06-04 2000 bytes
+part-07-00 2000 bytes
+part-07-01 2000 bytes
+part-07-02 2000 bytes
+part-07-03 2000 bytes
+part-07-04 2000 bytes
+part-08 348 bytes
+Decode status: 0
+Decoded bytes: 60261
+Actual SHA: b8388cbf73de7682c43735c03b847c4590be7b3bdd75d21da7d5c1fcda69be84
+Tar status: 0
+Tar entries: 21
+Tar error:
