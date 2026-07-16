@@ -1,2 +1,2 @@
 run: audited-full-tree-replacement
-synchronize: isolated-final-release
+synchronize: cancel-stale-and-run-final
