@@ -1,15 +1,12 @@
-name: Apply audited campaign release from PR event
+name: Apply audited campaign release
 
 on:
-  pull_request:
-    branches: [main]
-    types: [opened, synchronize, reopened]
-    paths:
-      - '.release-payload/PR_RUN'
+  issues:
+    types: [opened]
 
 permissions:
   contents: write
-  pull-requests: read
+  issues: write
 
 concurrency:
   group: audited-campaign-atomic-release
@@ -17,6 +14,7 @@ concurrency:
 
 jobs:
   apply:
+    if: github.event.issue.title == 'Publish corrected Omnicell campaign'
     runs-on: ubuntu-latest
     steps:
       - name: Check out canonical main
@@ -182,4 +180,32 @@ jobs:
           )
           request("PATCH", "/git/refs/heads/main", {"sha": commit["sha"], "force": True})
           print(f"Published audited main commit {commit['sha']}")
+          PY
+
+      - name: Close publication trigger issue
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json
+          import os
+          import urllib.request
+
+          repository = os.environ["GITHUB_REPOSITORY"]
+          issue = os.environ["GITHUB_EVENT_PATH"]
+          with open(issue, encoding="utf-8") as stream:
+              issue_number = json.load(stream)["issue"]["number"]
+          req = urllib.request.Request(
+              f"https://api.github.com/repos/{repository}/issues/{issue_number}",
+              data=json.dumps({"state": "closed", "state_reason": "completed"}).encode("utf-8"),
+              method="PATCH",
+              headers={
+                  "Authorization": f"Bearer {os.environ['GH_TOKEN']}",
+                  "Accept": "application/vnd.github+json",
+                  "X-GitHub-Api-Version": "2022-11-28",
+                  "User-Agent": "omnicell-audited-release",
+              },
+          )
+          urllib.request.urlopen(req).read()
           PY
