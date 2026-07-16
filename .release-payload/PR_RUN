@@ -1,2 +1,2 @@
 run: audited-full-tree-replacement
-synchronize: payload-diagnostic
+synchronize: generation-diagnostic
