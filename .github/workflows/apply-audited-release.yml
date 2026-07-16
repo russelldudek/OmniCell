@@ -38,15 +38,15 @@ jobs:
           find . -mindepth 1 -maxdepth 1 ! -name .git -exec rm -rf {} +
           cp -a /tmp/omnicell-audited-release/. .
 
-      - name: Prevent checker self-matches
+      - name: Apply release integrity corrections
         shell: bash
         run: |
           set -euo pipefail
           python3 - <<'PY'
           from pathlib import Path
 
-          path = Path("scripts/release-check.py")
-          text = path.read_text(encoding="utf-8")
+          checker = Path("scripts/release-check.py")
+          text = checker.read_text(encoding="utf-8")
           replacements = {
               '"Brayman Construction"': '"Bray" + "man Construction"',
               '"Komatsu"': '"Koma" + "tsu"',
@@ -59,7 +59,16 @@ jobs:
           }
           for old, new in replacements.items():
               text = text.replace(old, new)
-          path.write_text(text, encoding="utf-8")
+          checker.write_text(text, encoding="utf-8")
+
+          logo = Path("assets/brand/omnicell-logo.svg")
+          svg = logo.read_text(encoding="utf-8")
+          svg = svg.replace(
+              '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 147"',
+              '<svg xmlns="http://www.w3.org/2000/svg" width="600" height="147" viewBox="0 0 600 147"',
+              1,
+          )
+          logo.write_text(svg, encoding="utf-8")
           PY
 
       - name: Generate and verify printable PDFs
