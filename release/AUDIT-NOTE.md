@@ -1,0 +1,1 @@
+The candidate campaign is being replaced from a verified complete tree; temporary staging files will be removed in the final tree.
