@@ -22,14 +22,14 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Verify and unpack audited release
+      - name: Verify and unpack audited source
         shell: bash
         run: |
           set -euo pipefail
           mkdir -p /tmp/omnicell-audited-release
-          cat .release-payload/part-* | base64 --decode > /tmp/omnicell-campaign.tar.gz
-          echo "e40f678f2f8a8e9e86e6e4829f652fb6adf316695b0d81a3d2f46e64c31dc9dc  /tmp/omnicell-campaign.tar.gz" | sha256sum --check --strict
-          tar -xzf /tmp/omnicell-campaign.tar.gz -C /tmp/omnicell-audited-release
+          cat .release-payload/part-* | base64 --decode > /tmp/omnicell-campaign-source.tar.gz
+          echo "b8388cbf73de7682c43735c03b847c4590be7b3bdd75d21da7d5c1fcda69be84  /tmp/omnicell-campaign-source.tar.gz" | sha256sum --check --strict
+          tar -xzf /tmp/omnicell-campaign-source.tar.gz -C /tmp/omnicell-audited-release
 
       - name: Replace the repository tree
         shell: bash
@@ -37,6 +37,24 @@ jobs:
           set -euo pipefail
           find . -mindepth 1 -maxdepth 1 ! -name .git -exec rm -rf {} +
           cp -a /tmp/omnicell-audited-release/. .
+
+      - name: Generate and verify printable PDFs
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m venv /tmp/omnicell-pdf-env
+          /tmp/omnicell-pdf-env/bin/pip install --disable-pip-version-check playwright==1.55.0 pypdf==5.9.0
+          /tmp/omnicell-pdf-env/bin/playwright install --with-deps chromium
+          /tmp/omnicell-pdf-env/bin/python scripts/render-pdfs.py
+          /tmp/omnicell-pdf-env/bin/python scripts/release-check.py
+          ./scripts/build-site.sh /tmp/omnicell-release-site
+          cmp docs/Russell-Dudek-Omnicell-Robotics-Engineering-Resume.pdf /tmp/omnicell-release-site/docs/Russell-Dudek-Omnicell-Robotics-Engineering-Resume.pdf
+          cmp docs/Russell-Dudek-Omnicell-Robotics-Engineering-Cover-Letter.pdf /tmp/omnicell-release-site/docs/Russell-Dudek-Omnicell-Robotics-Engineering-Cover-Letter.pdf
+
+      - name: Commit the complete audited campaign
+        shell: bash
+        run: |
+          set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -A
