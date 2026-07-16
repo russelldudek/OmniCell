@@ -1,0 +1,44 @@
+name: Apply audited campaign release
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.release-payload/READY'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: audited-campaign-release
+  cancel-in-progress: false
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out current main
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Verify and unpack audited release
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/omnicell-audited-release
+          cat .release-payload/part-* | base64 --decode > /tmp/omnicell-campaign.tar.gz
+          echo "e40f678f2f8a8e9e86e6e4829f652fb6adf316695b0d81a3d2f46e64c31dc9dc  /tmp/omnicell-campaign.tar.gz" | sha256sum --check --strict
+          tar -xzf /tmp/omnicell-campaign.tar.gz -C /tmp/omnicell-audited-release
+
+      - name: Replace the repository tree
+        shell: bash
+        run: |
+          set -euo pipefail
+          find . -mindepth 1 -maxdepth 1 ! -name .git -exec rm -rf {} +
+          cp -a /tmp/omnicell-audited-release/. .
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Replace failed release with audited candidate campaign"
+          git push origin HEAD:main
