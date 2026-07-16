@@ -80,7 +80,7 @@ jobs:
           set -euo pipefail
           python3 -m venv /tmp/omnicell-pdf-env
           /tmp/omnicell-pdf-env/bin/pip install --disable-pip-version-check playwright==1.55.0 pypdf==5.9.0
-          /tmp/omnicell-pdf-env/bin/playwright install --with-deps chromium
+          /tmp/omnicell-pdf-env/bin/playwright install chromium
           /tmp/omnicell-pdf-env/bin/python scripts/render-pdfs.py
           /tmp/omnicell-pdf-env/bin/python scripts/release-check.py
           ./scripts/build-site.sh /tmp/omnicell-release-site
